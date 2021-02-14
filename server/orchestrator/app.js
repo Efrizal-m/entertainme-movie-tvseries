@@ -1,5 +1,6 @@
 const { ApolloServer, gql } = require('apollo-server');
-const axios = require('axios');
+const axiosMovies = require('./config/axiosinstance_movies');
+const axiosSeries = require('./config/axiosinstance_series');
 const Redis = require('ioredis');
 const redis = new Redis()
 
@@ -71,9 +72,9 @@ const resolvers = {
                 return JSON.parse(cache)
             } else {
                 const movies =
-                    await axios({
+                    await axiosMovies({
                         method:'get',
-                        url: 'http://localhost:4001/movies',
+                        url: '/movies',
                     })
                 if (!movies) {
                     throw { status: 404, message: `Data not found`}                
@@ -94,9 +95,9 @@ const resolvers = {
                 return data.find(el => { return el._id === args.id })
             } else {
                 const movies =
-                    await axios({
+                    await axiosMovies({
                         method:'get',
-                        url: 'http://localhost:4001/movies/'+args.id
+                        url: '/movies/'+args.id
                     })
                 if (!movies) {
                     throw { status: 404, message: `Data not found`}                
@@ -115,9 +116,9 @@ const resolvers = {
               return JSON.parse(cache)
           } else {
               const series =
-                  await axios({
+                  await axiosSeries({
                       method:'get',
-                      url: 'http://localhost:4002/tvSeries'
+                      url: '/tvSeries'
                   })
               if (!series) {
                   throw { status: 404, message: `Data not found`}                
@@ -138,9 +139,9 @@ const resolvers = {
               return data.find(el => { return el._id === args.id })
           } else {
               const series =
-                  await axios({
+                  await axiosSeries({
                       method:'get',
-                      url: 'http://localhost:4002/tvSeries/'+args.id
+                      url: '/tvSeries/'+args.id
                   })
               if (!series) {
                   throw { status: 404, message: `Data not found`}                
@@ -163,9 +164,9 @@ const resolvers = {
                     popularity: args.newMovie.popularity,
                     tags: args.newMovie.tags            
                 }
-                const movie = await axios({
+                const movie = await axiosMovies({
                     method:'post',
-                    url: 'http://localhost:4001/movies',
+                    url: '/movies',
                     data: newMovie
                 })
                 await redis.del("movies")
@@ -183,9 +184,9 @@ const resolvers = {
                     popularity: args.updatedMovie.popularity,
                     tags: args.updatedMovie.tags            
                 }
-                const movie = await axios({
+                const movie = await axiosMovies({
                     method:'put',
-                    url: 'http://localhost:4001/movies/'+args.updatedMovie.id,
+                    url: '/movies/'+args.updatedMovie.id,
                     data: updatedMovie
                 })
                 let cache = await redis.get("movies")
@@ -201,9 +202,9 @@ const resolvers = {
         },
         deleteMovie: async (_, args) => {
             try {
-                const movie = await axios({
+                const movie = await axiosMovies({
                     method:'delete',
-                    url: 'http://localhost:4001/movies/'+args.id
+                    url: '/movies/'+args.id
                 })
                 await redis.del("movies")
                 return movie.data                
@@ -221,9 +222,9 @@ const resolvers = {
                     popularity: args.newSerie.popularity,
                     tags: args.newSerie.tags            
                 }
-                const serie = await axios({
+                const serie = await axiosSeries({
                     method:'post',
-                    url: 'http://localhost:4002/tvSeries',
+                    url: '/tvSeries',
                     data: newSerie
                 })
                 await redis.del("series")
@@ -241,9 +242,9 @@ const resolvers = {
                     popularity: args.updatedSerie.popularity,
                     tags: args.updatedSerie.tags            
                 }
-                const serie = await axios({
+                const serie = await axiosSeries({
                     method:'put',
-                    url: 'http://localhost:4002/tvSeries/'+args.updatedSerie.id,
+                    url: '/tvSeries/'+args.updatedSerie.id,
                     data: updatedSerie
                 })
                 await redis.del("series")
@@ -254,9 +255,9 @@ const resolvers = {
         },
         deleteSerie: async (_, args) => {
             try {
-                const serie = await axios({
+                const serie = await axiosSeries({
                     method:'delete',
-                    url: 'http://localhost:4002/tvSeries/'+args.id
+                    url: '/tvSeries/'+args.id
                 })
                 await redis.del("series")
                 return serie.data                
